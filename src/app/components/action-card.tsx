@@ -1,14 +1,27 @@
 "use client"
 
+type IconType = "trophy" | "plus" | "list" | "user"
+
 type ActionCardProps = {
   title: string
   backgroundColor: string
-  icon: "trophy" | "plus" | "list"
+  icon: IconType
   onClick?: () => void
   className?: string
 }
 
 export function ActionCard({ title, backgroundColor, icon, onClick, className = "" }: ActionCardProps) {
+
+  const renderIcon = () => {
+    switch (icon) {
+      case "trophy": return <TrophyIcon />
+      case "plus": return <PlusIcon />
+      case "list": return <ListIcon />
+      case "user": return <UserIcon />
+      default: return null
+    }
+  }
+
   return (
     <button
       className={`group p-8 rounded-2xl transition-all hover:scale-105 hover:shadow-lg ${className}`}
@@ -18,10 +31,9 @@ export function ActionCard({ title, backgroundColor, icon, onClick, className = 
       <div className="flex flex-col items-center gap-4">
         {/* Icon Container */}
         <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center">
-          {icon === "trophy" && <TrophyIcon />}
-          {icon === "plus" && <PlusIcon />}
-          {icon === "list" && <ListIcon />}
+          {renderIcon()}
         </div>
+
         <span className="text-xl font-semibold text-white">{title}</span>
       </div>
     </button>
@@ -29,7 +41,7 @@ export function ActionCard({ title, backgroundColor, icon, onClick, className = 
 }
 
 // Icon Components
-function TrophyIcon() {
+export function TrophyIcon() {
   return (
     <div className="relative">
       <div className="w-8 h-10 border-4 border-white rounded-b-lg"></div>
@@ -38,7 +50,7 @@ function TrophyIcon() {
   )
 }
 
-function PlusIcon() {
+export function PlusIcon() {
   return (
     <div className="relative">
       <div className="w-8 h-1 bg-white"></div>
@@ -47,12 +59,21 @@ function PlusIcon() {
   )
 }
 
-function ListIcon() {
+export function ListIcon() {
   return (
     <div className="flex flex-col gap-1.5">
       <div className="w-8 h-1 bg-white rounded"></div>
       <div className="w-8 h-1 bg-white rounded"></div>
       <div className="w-8 h-1 bg-white rounded"></div>
+    </div>
+  )
+}
+
+export function UserIcon() {
+  return (
+    <div className="relative flex flex-col items-center">
+      <div className="w-6 h-6 rounded-full border-4 border-white"></div>
+      <div className="mt-1 w-10 h-6 border-4 border-white border-t-0 rounded-b-full"></div>
     </div>
   )
 }

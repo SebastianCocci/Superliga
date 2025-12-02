@@ -9,8 +9,9 @@ export function InfoRow({ label, value, isHighlight = false, noBorder = false }:
   return (
     <div className={`flex justify-between items-center py-3 ${!noBorder ? "border-b border-gray-200" : ""}`}>
       <span className="text-gray-600">{label}</span>
+
       {isHighlight ? (
-        <span className="text-2xl font-bold px-4 py-1 rounded-lg text-white" style={{ backgroundColor: "#A50343" }}>
+        <span className="text-2xl font-bold px-4 py-1 rounded-lg text-white bg-[#A50343]">
           {value}
         </span>
       ) : (
@@ -19,3 +20,4 @@ export function InfoRow({ label, value, isHighlight = false, noBorder = false }:
     </div>
   )
 }
+

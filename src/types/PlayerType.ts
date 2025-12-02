@@ -1,0 +1,8 @@
+export type PlayerFormData = {
+  nombre: string;
+  apellido: string;
+  dni: string;
+  email: string;
+  telefono: string;
+  role: "admin" | "jugador";
+};

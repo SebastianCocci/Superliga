@@ -1,19 +1,22 @@
-"use client"
+"use client";
 
-import { useState } from "react"
+import { useState } from "react";
+import { playerService } from "@/app/api/jugadores/services/playerService";
+import { useModal } from "@/app/context/ModalContext";
 
 type PlayerFormData = {
-  nombre: string
-  apellido: string
-  dni: string
-  email: string
-  telefono: string
-  role: "admin" | "jugador"
-  categoria: "Top ten" | "A" | "B" | "C" | "D"
-}
-
+  nombre: string;
+  apellido: string;
+  dni: string;
+  email: string;
+  telefono: string;
+  role: "admin" | "jugador";
+  categoria: "Top ten" | "A" | "B" | "C" | "D";
+};
 
 export default function NuevoJugadorPage() {
+  const { openModal } = useModal();
+
   const [formData, setFormData] = useState<PlayerFormData>({
     nombre: "",
     apellido: "",
@@ -21,137 +24,162 @@ export default function NuevoJugadorPage() {
     email: "",
     telefono: "",
     role: "jugador",
-    categoria: "Top ten", // valor inicial por defecto
-  })
+    categoria: "Top ten",
+  });
 
-  const handleChange = (field: keyof PlayerFormData, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }))
+  /* ===========================================================
+      UTILIDAD CENTRAL DE TIPADO SEGURO
+  ============================================================ */
+  function getErrorMessage(error: unknown): string {
+    return error instanceof Error ? error.message : "Ocurrió un error inesperado.";
   }
 
+  /* ===========================================================
+      HANDLERS
+  ============================================================ */
+
+  const updateValue = (field: keyof PlayerFormData, value: string) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  // Función que realmente crea el jugador
+  const crearJugador = async () => {
+    try {
+      await playerService.create(formData);
+
+      openModal({
+        title: "Jugador creado",
+        message: "El jugador fue creado correctamente.",
+        confirmText: "Aceptar",
+        onConfirm: () => {
+          setFormData({
+            nombre: "",
+            apellido: "",
+            dni: "",
+            email: "",
+            telefono: "",
+            role: "jugador",
+            categoria: "Top ten",
+          });
+        },
+      });
+
+    } catch (error) {
+      openModal({
+        title: "Error",
+        message: getErrorMessage(error),
+        confirmText: "Cerrar",
+      });
+    }
+  };
+
+  // Confirmación antes de crear
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
-    console.log("Usuario guardado:", formData)
+    openModal({
+      title: "Confirmar creación",
+      message: `¿Crear al jugador ${formData.nombre} ${formData.apellido}?`,
+      confirmText: "Crear",
+      cancelText: "Cancelar",
+      onConfirm: crearJugador,
+    });
+  };
 
-    alert("Usuario guardado correctamente")
-  }
-
+  // Cancelación del formulario
   const handleCancel = () => {
-    setFormData({
-      nombre: "",
-      apellido: "",
-      dni: "",
-      email: "",
-      telefono: "",
-      role: "jugador",
-      categoria: "Top ten",
-    })
+    openModal({
+      title: "Cancelar",
+      message: "¿Deseas limpiar el formulario?",
+      confirmText: "Sí, limpiar",
+      cancelText: "Volver",
+      onConfirm: () =>
+        setFormData({
+          nombre: "",
+          apellido: "",
+          dni: "",
+          email: "",
+          telefono: "",
+          role: "jugador",
+          categoria: "Top ten",
+        }),
+    });
+  };
 
-  }
+  /* ===========================================================
+      UI
+  ============================================================ */
 
   return (
     <div className="max-w-3xl mx-auto py-10">
-      <h1 className="text-3xl font-bold mb-8 text-[#A50343]">Nuevo Usuario</h1>
+      <h1 className="text-3xl font-bold mb-8 text-[#A50343]">
+        Nuevo Jugador
+      </h1>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 space-y-6">
 
           {/* Nombre */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Nombre
-            </label>
-            <input
-              type="text"
-              value={formData.nombre}
-              onChange={(e) => handleChange("nombre", e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#A50343]"
-              placeholder="Ingresa el nombre"
-              required
-            />
-          </div>
+          <FormInput
+            label="Nombre"
+            value={formData.nombre}
+            placeholder="Ingresa el nombre"
+            onChange={(v) => updateValue("nombre", v)}
+          />
 
           {/* Apellido */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Apellido
-            </label>
-            <input
-              type="text"
-              value={formData.apellido}
-              onChange={(e) => handleChange("apellido", e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#A50343]"
-              placeholder="Ingresa el apellido"
-              required
-            />
-          </div>
+          <FormInput
+            label="Apellido"
+            value={formData.apellido}
+            placeholder="Ingresa el apellido"
+            onChange={(v) => updateValue("apellido", v)}
+          />
 
           {/* DNI */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              DNI
-            </label>
-            <input
-              type="text"
-              value={formData.dni}
-              onChange={(e) => handleChange("dni", e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#A50343]"
-              placeholder="Ingresa el DNI"
-              required
-            />
-          </div>
+          <FormInput
+            label="DNI"
+            value={formData.dni}
+            placeholder="Ingresa el DNI"
+            onChange={(v) => updateValue("dni", v)}
+          />
 
           {/* Email */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Email
-            </label>
-            <input
-              type="email"
-              value={formData.email}
-              onChange={(e) => handleChange("email", e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#A50343]"
-              placeholder="ejemplo@correo.com"
-              required
-            />
-          </div>
+          <FormInput
+            label="Email"
+            value={formData.email}
+            type="email"
+            placeholder="ejemplo@correo.com"
+            onChange={(v) => updateValue("email", v)}
+          />
 
           {/* Teléfono */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Teléfono
-            </label>
-            <input
-              type="tel"
-              value={formData.telefono}
-              onChange={(e) => handleChange("telefono", e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#A50343]"
-              placeholder="+54 9 11 1234-5678"
-              required
-            />
-          </div>
+          <FormInput
+            label="Teléfono"
+            value={formData.telefono}
+            type="tel"
+            placeholder="+54 9 11 1234-5678"
+            onChange={(v) => updateValue("telefono", v)}
+          />
+
+          {/* Categoría */}
+          <FormSelect
+            label="Categoría"
+            value={formData.categoria}
+            onChange={(v) => updateValue("categoria", v)}
+            options={["Top ten", "A", "B", "C", "D"]}
+          />
 
           {/* Rol */}
-          <div className="relative">
-            <select
-              value={formData.role}
-              onChange={(e) => handleChange("role", e.target.value as "admin" | "jugador")}
-              className="w-full px-4 py-3 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#A50343] appearance-none"
-              required
-            >
-              <option value="jugador">Jugador</option>
-              <option value="admin">Administrador</option>
-            </select>
-
-            {/* flecha custom */}
-            <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-black-500">
-              ▼
-            </div>
-          </div>
+          <FormSelect
+            label="Rol"
+            value={formData.role}
+            onChange={(v) => updateValue("role", v as "admin" | "jugador")}
+            options={["jugador", "admin"]}
+          />
 
         </div>
 
-        {/* Buttons */}
+        {/* Botones */}
         <div className="flex flex-col-reverse sm:flex-row gap-4 sm:justify-end">
           <button
             type="button"
@@ -170,5 +198,69 @@ export default function NuevoJugadorPage() {
         </div>
       </form>
     </div>
-  )
+  );
+}
+
+/* ===========================================================
+   COMPONENTES REUTILIZABLES
+=========================================================== */
+
+type InputProps = {
+  label: string;
+  value: string;
+  placeholder?: string;
+  type?: string;
+  onChange: (v: string) => void;
+};
+
+function FormInput({
+  label,
+  value,
+  placeholder,
+  type = "text",
+  onChange,
+}: InputProps) {
+  return (
+    <div>
+      <label className="block text-sm font-medium text-gray-700 mb-2">
+        {label}
+      </label>
+      <input
+        type={type}
+        value={value}
+        placeholder={placeholder}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#A50343]"
+        required
+      />
+    </div>
+  );
+}
+
+type SelectProps = {
+  label: string;
+  value: string;
+  options: string[];
+  onChange: (v: string) => void;
+};
+
+function FormSelect({ label, value, options, onChange }: SelectProps) {
+  return (
+    <div>
+      <label className="block text-sm font-medium text-gray-700 mb-2">
+        {label}
+      </label>
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#A50343]"
+      >
+        {options.map((opt) => (
+          <option key={opt} value={opt}>
+            {opt}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
 }

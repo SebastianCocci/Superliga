@@ -10,7 +10,7 @@ type AdminLayoutProps = {
 
 export default function AdminLayout({ children }: AdminLayoutProps) {
     return (
-        <div className="flex min-h-screen bg-gray-50">
+        <div className="min-h-screen flex">
             {/* Sidebar Dinámico */}
             <Sidebar role="admin" className="h-screen" />
             {/* Contenido Principal */}

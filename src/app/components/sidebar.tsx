@@ -1,6 +1,13 @@
 "use client";
 
-import { CalendarIcon, HomeIcon, TableIcon, TrophyIcon, UsersIcon } from "lucide-react";
+import {
+  CalendarIcon,
+  HomeIcon,
+  TableIcon,
+  TrophyIcon,
+  UsersIcon,
+  HistoryIcon,
+} from "lucide-react";
 import { useState } from "react";
 
 /* ---------------- ICONO FALTANTE: StatsIcon ---------------- */
@@ -17,6 +24,7 @@ function StatsIcon() {
     </svg>
   );
 }
+
 function MenuIcon({ isOpen }: { isOpen: boolean }) {
   return (
     <div className="w-6 h-6 flex flex-col justify-center gap-1.5">
@@ -87,7 +95,12 @@ export function Sidebar({ className = "", role }: SidebarProps) {
           <nav className="flex-1 p-2 overflow-y-auto">
             <ul className="space-y-1">
               {menu.map((item) => (
-                <SidebarItem key={item.label} icon={item.icon} label={item.label} href={item.href} />
+                <SidebarItem
+                  key={item.label}
+                  icon={item.icon}
+                  label={item.label}
+                  href={item.href}
+                />
               ))}
             </ul>
           </nav>
@@ -117,19 +130,48 @@ function SidebarItem({ icon, label, href }: SidebarItemProps) {
   );
 }
 
+/* ------------------ MENÚS ------------------ */
+
 const jugadorMenu = [
-  { label: "Inicio", href: "/jugadores", icon: <HomeIcon /> },
-  { label: "Resultados", href: "/resultados", icon: <TrophyIcon /> },
-  { label: "Tabla", href: "/tabla", icon: <TableIcon /> },
-  { label: "Jugadores", href: "/jugadores", icon: <UsersIcon /> },
-  { label: "Calendario", href: "/calendario", icon: <CalendarIcon /> },
-  { label: "Estadísticas", href: "/estadisticas", icon: <StatsIcon /> },
+  {
+    label: "Inicio",
+    href: "/jugadores",
+    icon: <HomeIcon />,
+  },
+  {
+    label: "Resultados",
+    href: "/jugadores/resultados", // solo aprobados
+    icon: <TrophyIcon />,
+  },
+  {
+    label: "Tabla",
+    href: "/jugadores/tabla", // tabla de posiciones
+    icon: <TableIcon />,
+  },
+  {
+    label: "Jugadores",
+    href: "/jugadores/lista", // lista de jugadores misma categoría
+    icon: <UsersIcon />,
+  },
+  {
+    label: "Calendario",
+    href: "/jugadores/calendario", // partidos pendientes
+    icon: <CalendarIcon />,
+  },
+  {
+    label: "Estadísticas",
+    href: "/jugadores/estadisticas", // futuro / opcional
+    icon: <StatsIcon />,
+  },
 ];
 
+
 const adminMenu = [
-  { label: "Dashboard", href: "/admin", icon: <HomeIcon /> },
+  { label: "Inicio", href: "/admin", icon: <HomeIcon /> },
   { label: "Gestionar Jugadores", href: "/admin/jugadores", icon: <UsersIcon /> },
-  { label: "Crear Rondas", href: "/admin/rondas", icon: <CalendarIcon /> },
-  { label: "Subir Resultados", href: "/admin/resultados", icon: <TrophyIcon /> },
+  { label: "Resultados Pendientes", href: "/admin/resultados/pendientes", icon: <TrophyIcon /> },
+  { label: "Resultados Anteriores", href: "/admin/resultados/historial", icon: <HistoryIcon /> },
+  { label: "Tabla de Posiciones", href: "/admin/tabla", icon: <TableIcon /> },
+  { label: "Generar Fixture", href: "/admin/fixture", icon: <CalendarIcon /> },
   { label: "Configuración", href: "/admin/configuracion", icon: <StatsIcon /> },
 ];

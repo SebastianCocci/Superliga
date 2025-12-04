@@ -1,15 +1,17 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongoose";
+
+// REGISTRA TODOS LOS MODELOS
+import "@/models";
+
 import { Player } from "@/models/PlayerModel";
 import { Partido } from "@/models/PartidoModel";
-import { generarFixture } from "@/utils/generarFixture";
-import { Types } from "mongoose";
+import generarFixture from "@/utils/generarFixture";
 
 export async function POST(req: Request) {
   try {
     await connectDB();
 
-    // Recibimos la categoría desde el body
     const { categoria } = await req.json();
 
     if (!categoria) {
@@ -19,35 +21,24 @@ export async function POST(req: Request) {
       );
     }
 
-    // Obtenemos jugadores activos de esa categoría
     const jugadores = await Player.find({ categoria, activo: true })
-      .select("_id")
+      .populate("userId")
       .lean();
 
     if (jugadores.length < 2) {
       return NextResponse.json(
-        { error: "Se necesitan al menos 2 jugadores para generar el fixture" },
+        { error: "Se necesitan al menos 2 jugadores" },
         { status: 400 }
       );
     }
 
-    // Generar los partidos (OBJETOS EN MEMORIA)
-    const partidos = generarFixture(
-      jugadores as { _id: Types.ObjectId }[],
-      categoria
-    );
+    const fixture = generarFixture(jugadores, categoria);
 
-    // Eliminamos fixtures anteriores de la categoría
     await Partido.deleteMany({ categoria });
-
-    // Insertamos los nuevos partidos en BD
-    await Partido.insertMany(partidos);
+    await Partido.insertMany(fixture);
 
     return NextResponse.json(
-      {
-        message: "Fixture generado correctamente",
-        cantidadPartidos: partidos.length,
-      },
+      { message: "Fixture generado correctamente" },
       { status: 201 }
     );
   } catch (error) {

@@ -1,75 +1,66 @@
+// src/utils/generarFixture.ts
 import { Types } from "mongoose";
 
-// Categorías válidas
-type Categoria = "Top ten" | "A" | "B" | "C" | "D";
+export interface PlayerForFixture {
+  _id: Types.ObjectId | string;
+}
 
-// Lo mínimo que necesitamos de cada jugador para armar el fixture
-type PlayerForFixture = {
-  _id: Types.ObjectId;
-};
-
-// Jugador real o un hueco ("bye") para cuando la cantidad es impar
-type PlayerOrBye = PlayerForFixture | { _id: null };
-
-// Tipo de los partidos que devuelve esta función (listos para insertar)
-export type PartidoFixture = {
-  categoria: Categoria;
+export interface PartidoFixture {
+  categoria: string;
   fechaNumero: number;
   jugador1: Types.ObjectId;
   jugador2: Types.ObjectId;
   estado: "sin_cargar";
-};
+}
 
-/**
- * Genera un fixture Round Robin (todos contra todos) para una categoría.
- * Recibe una lista de jugadores (con _id) y devuelve los partidos.
- */
-export function generarFixture(
+export default function generarFixture(
   jugadores: PlayerForFixture[],
-  categoria: Categoria
+  categoria: string
 ): PartidoFixture[] {
-  if (jugadores.length < 2) {
-    throw new Error("Se necesitan al menos 2 jugadores para generar el fixture.");
-  }
+  const ids = jugadores.map((j) =>
+    typeof j._id === "string" ? new Types.ObjectId(j._id) : j._id
+  );
 
-  // Copiamos para no mutar el array original
-  const players: PlayerOrBye[] = [...jugadores];
+  const fixture: PartidoFixture[] = [];
+  const n = ids.length;
+  const esImpar = n % 2 === 1;
 
-  // Si la cantidad es impar, agregamos un "BYE"
-  const isOdd = players.length % 2 !== 0;
-  if (isOdd) {
-    players.push({ _id: null });
-  }
+  // 👇 importante: array tipado con posible null
+  const players: (Types.ObjectId | null)[] = esImpar ? [...ids, null] : [...ids];
+  const total = players.length;
 
-  const n = players.length;
-  const rondas = n - 1;
-  const half = n / 2;
+  const rondas = total - 1;
+  const mitad = total / 2;
 
-  const partidos: PartidoFixture[] = [];
+  for (let ronda = 0; ronda < rondas; ronda++) {
+    // emparejamientos de la ronda actual
+    for (let i = 0; i < mitad; i++) {
+      const p1 = players[i];
+      const p2 = players[total - 1 - i];
 
-  for (let ronda = 1; ronda <= rondas; ronda++) {
-    for (let i = 0; i < half; i++) {
-      const j1 = players[i];
-      const j2 = players[n - 1 - i];
-
-      // Si alguno es BYE, no se genera partido
-      if (j1._id === null || j2._id === null) continue;
-
-      partidos.push({
-        categoria,
-        fechaNumero: ronda,
-        jugador1: j1._id,
-        jugador2: j2._id,
-        estado: "sin_cargar",
-      });
+      // si hay bye (null) se omite ese partido
+      if (p1 && p2) {
+        fixture.push({
+          categoria,
+          fechaNumero: ronda + 1,
+          jugador1: p1,
+          jugador2: p2,
+          estado: "sin_cargar",
+        });
+      }
     }
 
-    // Rotación "método del círculo" (sin tocar la posición 0)
-    const last = players.pop();
-    if (last) {
-      players.splice(1, 0, last);
-    }
+    // 🔧 ROTACIÓN CORREGIDA: mantiene el mismo length siempre
+    const fijo = players[0];
+    const resto = players.slice(1); // copia de los demás
+
+    // rota a la derecha los elementos del resto
+    resto.unshift(resto.pop() as Types.ObjectId | null);
+
+    // sobrescribe solo la parte [1..fin] sin cambiar el tamaño del array
+    players.splice(1, resto.length, ...resto);
+    players[0] = fijo;
   }
 
-  return partidos;
+  return fixture;
 }

@@ -3,7 +3,11 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useModal } from "@/app/context/ModalContext";
-import { playerService, PlayerUpdateData } from "@/app/api/jugadores/services/playerService";
+import {
+  playerService,
+  PlayerUpdateData,
+} from "@/app/api/jugadores/services/playerService";
+import { ActionButton, ActionLink } from "@/components/ActionButtons";
 
 type JugadorData = {
   _id: string;
@@ -48,7 +52,6 @@ export default function EditarJugadorPage() {
   /* ===========================================================
       SPINNERS Y VALIDACIONES
   ============================================================ */
-
   if (loading) {
     return (
       <div className="max-w-3xl mx-auto py-10 px-4 flex justify-center">
@@ -58,17 +61,22 @@ export default function EditarJugadorPage() {
   }
 
   if (!jugador) {
-    return <p className="text-center py-10 text-gray-500">Jugador no encontrado</p>;
+    return (
+      <p className="text-center py-10 text-gray-500">Jugador no encontrado</p>
+    );
   }
 
   if (!jugador.userId) {
-    return <p className="text-center py-10 text-gray-500">Datos del usuario no disponibles</p>;
+    return (
+      <p className="text-center py-10 text-gray-500">
+        Datos del usuario no disponibles
+      </p>
+    );
   }
 
   /* ===========================================================
       GUARDAR CAMBIOS
   ============================================================ */
-
   async function guardarCambios() {
     if (!jugador) return;
 
@@ -89,7 +97,6 @@ export default function EditarJugadorPage() {
         confirmText: "Aceptar",
         onConfirm: () => router.push("/admin/jugadores"),
       });
-
     } catch (error) {
       console.error(error);
 
@@ -104,21 +111,26 @@ export default function EditarJugadorPage() {
   /* ===========================================================
       UI
   ============================================================ */
-
   return (
     <div className="max-w-3xl mx-auto py-10 px-4">
       <h1 className="text-3xl font-bold text-[#A50343] mb-8">Editar Jugador</h1>
 
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 space-y-6">
-
         {/* DATOS SUPERIORES */}
         <p className="text-gray-700">
-          <strong>Nombre:</strong> {jugador.userId.nombre} {jugador.userId.apellido}
+          <strong>Nombre:</strong> {jugador.userId.nombre}{" "}
+          {jugador.userId.apellido}
         </p>
 
-        <p className="text-gray-700"><strong>DNI:</strong> {jugador.userId.dni}</p>
-        <p className="text-gray-700"><strong>Teléfono:</strong> {jugador.userId.telefono}</p>
-        <p className="text-gray-700"><strong>Categoría actual:</strong> {jugador.categoria}</p>
+        <p className="text-gray-700">
+          <strong>DNI:</strong> {jugador.userId.dni}
+        </p>
+        <p className="text-gray-700">
+          <strong>Teléfono:</strong> {jugador.userId.telefono}
+        </p>
+        <p className="text-gray-700">
+          <strong>Categoría actual:</strong> {jugador.categoria}
+        </p>
 
         {/* FORMULARIO */}
         <form
@@ -135,69 +147,102 @@ export default function EditarJugadorPage() {
             });
           }}
         >
-
           {/* Nombre */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Nombre</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Nombre
+            </label>
             <input
               type="text"
               value={jugador.userId.nombre}
               onChange={(e) =>
-                setJugador({ ...jugador, userId: { ...jugador.userId, nombre: e.target.value } })
+                setJugador({
+                  ...jugador,
+                  userId: { ...jugador.userId, nombre: e.target.value },
+                })
               }
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#A50343]"
               required
+              autoComplete="given-name"
+              enterKeyHint="next"
             />
           </div>
 
           {/* Apellido */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Apellido</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Apellido
+            </label>
             <input
               type="text"
               value={jugador.userId.apellido}
               onChange={(e) =>
-                setJugador({ ...jugador, userId: { ...jugador.userId, apellido: e.target.value } })
+                setJugador({
+                  ...jugador,
+                  userId: { ...jugador.userId, apellido: e.target.value },
+                })
               }
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#A50343]"
               required
+              autoComplete="family-name"
+              enterKeyHint="next"
             />
           </div>
 
           {/* Teléfono */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Teléfono</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Teléfono
+            </label>
             <input
-              type="text"
+              type="tel"
               value={jugador.userId.telefono}
               onChange={(e) =>
-                setJugador({ ...jugador, userId: { ...jugador.userId, telefono: e.target.value } })
+                setJugador({
+                  ...jugador,
+                  userId: { ...jugador.userId, telefono: e.target.value },
+                })
               }
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#A50343]"
               required
+              inputMode="tel"
+              autoComplete="tel"
+              enterKeyHint="next"
             />
           </div>
 
           {/* DNI */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">DNI</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              DNI
+            </label>
             <input
               type="text"
               value={jugador.userId.dni}
               onChange={(e) =>
-                setJugador({ ...jugador, userId: { ...jugador.userId, dni: e.target.value } })
+                setJugador({
+                  ...jugador,
+                  userId: { ...jugador.userId, dni: e.target.value },
+                })
               }
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#A50343]"
               required
+              inputMode="numeric"
+              autoComplete="off"
+              enterKeyHint="next"
             />
           </div>
 
           {/* Categoría */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Categoría</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Categoría
+            </label>
             <select
               value={jugador.categoria}
-              onChange={(e) => setJugador({ ...jugador, categoria: e.target.value })}
+              onChange={(e) =>
+                setJugador({ ...jugador, categoria: e.target.value })
+              }
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#A50343] bg-white"
             >
               <option value="Top ten">Top ten</option>
@@ -209,20 +254,23 @@ export default function EditarJugadorPage() {
           </div>
 
           {/* BOTONES */}
-          <div className="flex justify-end gap-4 pt-4">
-            <a
+          <div className="flex justify-end gap-3 pt-4 flex-wrap">
+            <ActionLink
+              variant="neutral"
               href="/admin/jugadores"
-              className="px-6 py-3 bg-[#8AC2EB] text-white rounded-lg font-medium hover:bg-[#7AB3D9]"
+              className="px-6 py-3"
             >
               Cancelar
-            </a>
+            </ActionLink>
 
-            <button
+            <ActionButton
+              variant="primary"
               type="submit"
-              className="px-6 py-3 bg-[#A50343] text-white rounded-lg font-medium hover:bg-[#8A0336]"
+              onClick={() => {}}
+              className="px-6 py-3"
             >
               Guardar Cambios
-            </button>
+            </ActionButton>
           </div>
         </form>
       </div>

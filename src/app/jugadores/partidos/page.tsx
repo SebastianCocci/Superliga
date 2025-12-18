@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 
 type PlayerInfo = {
   _id: string;
@@ -28,12 +29,19 @@ type PartidosPorFecha = {
 };
 
 export default function JugadorPartidosPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const from = searchParams.get("from");
+  const hideCargarButton = from === "calendario";
+
   const [grouped, setGrouped] = useState<PartidosPorFecha[]>([]);
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  // TODO: cuando haya login, sacar la categoría del jugador logueado
-  const categoriaActual: PartidoPendiente["categoria"] = "D";
+  const [categoriaActual, setCategoriaActual] = useState<
+    PartidoPendiente["categoria"] | null
+  >(null);
 
   useEffect(() => {
     async function fetchPartidos() {
@@ -41,11 +49,21 @@ export default function JugadorPartidosPage() {
         setLoading(true);
         setErrorMsg(null);
 
-        const res = await fetch(
-          `/api/partidos/pendientes?categoria=${encodeURIComponent(
-            categoriaActual
-          )}`
-        );
+        const res = await fetch("/api/partidos/pendientes", {
+          credentials: "include",
+          cache: "no-store",
+        });
+
+        if (res.status === 401) {
+          router.replace("/login?next=/jugadores/partidos");
+          return;
+        }
+
+        if (res.status === 403) {
+          setErrorMsg("No tenés permisos para ver esta sección.");
+          setGrouped([]);
+          return;
+        }
 
         if (!res.ok) {
           throw new Error("No se pudieron obtener los partidos pendientes");
@@ -53,12 +71,13 @@ export default function JugadorPartidosPage() {
 
         const data: PartidoPendiente[] = await res.json();
 
+        if (data.length > 0) setCategoriaActual(data[0].categoria);
+        else setCategoriaActual(null);
+
         const mapPorFecha: Record<number, PartidoPendiente[]> = {};
 
         data.forEach((p) => {
-          if (!mapPorFecha[p.fechaNumero]) {
-            mapPorFecha[p.fechaNumero] = [];
-          }
+          if (!mapPorFecha[p.fechaNumero]) mapPorFecha[p.fechaNumero] = [];
           mapPorFecha[p.fechaNumero].push(p);
         });
 
@@ -83,7 +102,7 @@ export default function JugadorPartidosPage() {
     }
 
     fetchPartidos();
-  }, [categoriaActual]);
+  }, [router]);
 
   if (loading) {
     return (
@@ -96,18 +115,15 @@ export default function JugadorPartidosPage() {
   return (
     <div className="max-w-5xl mx-auto py-10 px-4">
       <h1 className="text-3xl font-bold text-[#A50343] mb-6">
-        Mis Partidos – Categoría {categoriaActual}
+        Mis Partidos{categoriaActual ? ` – Categoría ${categoriaActual}` : ""}
       </h1>
 
-      {errorMsg && (
-        <p className="mb-4 text-sm text-red-600">
-          {errorMsg}
-        </p>
-      )}
+      {errorMsg && <p className="mb-4 text-sm text-red-600">{errorMsg}</p>}
 
       {grouped.length === 0 ? (
         <p className="text-gray-600">
-          No tenés partidos pendientes en esta categoría.
+          No tenés partidos pendientes
+          {categoriaActual ? " en esta categoría" : ""}.
         </p>
       ) : (
         <div className="space-y-6">
@@ -128,7 +144,6 @@ export default function JugadorPartidosPage() {
                     key={p._id}
                     className="px-4 py-3 flex flex-col md:flex-row md:items-center md:justify-between gap-2"
                   >
-                    {/* Jugadores */}
                     <div className="text-sm text-gray-800">
                       <strong>
                         {p.jugador1.userId.apellido}, {p.jugador1.userId.nombre}
@@ -140,7 +155,6 @@ export default function JugadorPartidosPage() {
                     </div>
 
                     <div className="flex items-center gap-3">
-                      {/* Estado */}
                       <span
                         className={`inline-flex items-center justify-center px-3 py-1 rounded-full text-xs font-semibold
                           ${
@@ -165,16 +179,16 @@ export default function JugadorPartidosPage() {
                         {p.estado === "rechazado" && "Resultado rechazado"}
                       </span>
 
-                      {/* Botón Cargar Resultado: solo si aún no está aprobado */}
-                      {(p.estado === "sin_cargar" ||
-                        p.estado === "rechazado") && (
-                        <Link
-                          href={`/jugadores/partidos/${p._id}`}
-                          className="px-4 py-2 rounded-lg text-xs font-semibold bg-[#A50343] text-white hover:bg-[#8A0336]"
-                        >
-                          Cargar resultado
-                        </Link>
-                      )}
+                      {!hideCargarButton &&
+                        (p.estado === "sin_cargar" ||
+                          p.estado === "rechazado") && (
+                          <Link
+                            href={`/jugadores/partidos/${p._id}`}
+                            className="px-4 py-2 rounded-lg text-xs font-semibold bg-[#A50343] text-white hover:bg-[#8A0336]"
+                          >
+                            Cargar resultado
+                          </Link>
+                        )}
                     </div>
                   </li>
                 ))}

@@ -1,19 +1,57 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { cookies } from "next/headers";
 import { connectDB } from "@/lib/mongoose";
+import { verifyToken } from "@/lib/jwt";
 import { Player } from "@/models/PlayerModel";
 import { User } from "@/models/UserModel";
+
+type Role = "admin" | "jugador";
+
+type RequireAdminResult =
+  | { ok: true; payload: { id: string; email: string; role: Role } }
+  | { ok: false; res: NextResponse };
+
+async function requireAdmin(): Promise<RequireAdminResult> {
+  const cookieStore = await cookies();
+  const token = cookieStore.get("slp_token")?.value;
+
+  if (!token) {
+    return {
+      ok: false,
+      res: NextResponse.json({ error: "No autenticado" }, { status: 401 }),
+    };
+  }
+
+  const payload = verifyToken(token);
+  if (!payload) {
+    return {
+      ok: false,
+      res: NextResponse.json({ error: "Sesión inválida" }, { status: 401 }),
+    };
+  }
+
+  if (payload.role !== "admin") {
+    return {
+      ok: false,
+      res: NextResponse.json({ error: "No autorizado" }, { status: 403 }),
+    };
+  }
+
+  return { ok: true, payload };
+}
 
 export async function DELETE(
   request: Request,
   context: { params: Promise<{ id: string }> }
 ) {
+  const auth = await requireAdmin();
+  if (!auth.ok) return auth.res;
+
   try {
     await connectDB();
 
-    // Next.js 14: params es una promesa
     const { id } = await context.params;
 
-    // 1. Buscar el jugador por ID
     const player = await Player.findById(id);
 
     if (!player) {
@@ -23,13 +61,9 @@ export async function DELETE(
       );
     }
 
-    // Guardamos el userId antes de eliminar el jugador
     const userId = player.userId;
 
-    // 2. Eliminar el jugador
     await Player.findByIdAndDelete(id);
-
-    // 3. Eliminar el usuario asociado
     await User.findByIdAndDelete(userId);
 
     return NextResponse.json({
@@ -50,14 +84,22 @@ export async function PUT(
   request: Request,
   context: { params: Promise<{ id: string }> }
 ) {
+  const auth = await requireAdmin();
+  if (!auth.ok) return auth.res;
+
   try {
     await connectDB();
     const { id } = await context.params;
-    const body = await request.json();
+    const body = (await request.json()) as {
+      nombre: string;
+      apellido: string;
+      dni: string;
+      telefono: string;
+      categoria: string;
+    };
 
     const { nombre, apellido, dni, telefono, categoria } = body;
 
-    // Actualizar jugador
     const jugador = await Player.findById(id).populate("userId");
 
     if (!jugador) {
@@ -67,14 +109,14 @@ export async function PUT(
       );
     }
 
-    // actualizar campos del user
+    const userId = (jugador.userId as { _id: string })._id;
+
     await User.findByIdAndUpdate(
-      jugador.userId._id,
+      userId,
       { nombre, apellido, dni, telefono },
       { new: true }
     );
 
-    // actualizar categoría del player
     jugador.categoria = categoria;
     await jugador.save();
 
@@ -96,24 +138,15 @@ export async function GET(
   req: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
+  const auth = await requireAdmin();
+  if (!auth.ok) return auth.res;
+
   try {
     await connectDB();
 
-    // params ahora es una PROMESA → hay que await
     const { id } = await context.params;
 
-    console.log("=== GET /api/jugadores/[id] ===");
-    console.log("ID recibido:", id);
-
-    const jugadores = await Player.find().select("_id");
-    console.log(
-      "Jugadores encontrados en la colección:",
-      jugadores.map(j => j._id.toString())
-    );
-
     const player = await Player.findById(id).populate("userId").lean();
-
-    console.log("Resultado de findById:", player);
 
     if (!player) {
       return NextResponse.json(
@@ -123,7 +156,6 @@ export async function GET(
     }
 
     return NextResponse.json(player, { status: 200 });
-
   } catch (error) {
     console.error("Error obteniendo jugador:", error);
     return NextResponse.json(
@@ -134,16 +166,18 @@ export async function GET(
 }
 
 /* PATCH */
-
 export async function PATCH(
   request: Request,
   context: { params: Promise<{ id: string }> }
 ) {
+  const auth = await requireAdmin();
+  if (!auth.ok) return auth.res;
+
   try {
     await connectDB();
     const { id } = await context.params;
 
-    const { activo } = await request.json();
+    const { activo } = (await request.json()) as { activo: boolean };
 
     const updated = await Player.findByIdAndUpdate(
       id,

@@ -86,7 +86,7 @@ export default function JugadorHomePage() {
   }, [router]);
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8 space-y-12">
+    <div className="max-w-6xl mx-auto py-4 sm:py-8 space-y-6 sm:space-y-12">
       <HeroSection />
 
       <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -94,7 +94,7 @@ export default function JugadorHomePage() {
           title="Ver Partidos"
           backgroundColor="#A50343"
           icon="trophy"
-          onClick={() => router.push("/jugadores/partidos")}
+          onClick={() => router.push("/jugadores/resultados")}
         />
 
         <ActionCard
@@ -109,7 +109,7 @@ export default function JugadorHomePage() {
           backgroundColor="#A50343"
           icon="list"
           className="md:col-span-2 lg:col-span-1"
-          onClick={() => router.push("/jugadores/partidos")}
+          onClick={() => router.push("/jugadores/tabla")}
         />
       </section>
 

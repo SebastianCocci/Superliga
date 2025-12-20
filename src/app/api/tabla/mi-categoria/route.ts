@@ -48,13 +48,19 @@ async function getAuth(): Promise<
   const token = cookieStore.get("slp_token")?.value ?? null;
 
   if (!token) {
-    return { ok: false, res: NextResponse.json({ error: "No autorizado" }, { status: 401 }) };
+    return {
+      ok: false,
+      res: NextResponse.json({ error: "No autorizado" }, { status: 401 }),
+    };
   }
 
   const payload = verifyToken(token) as JWTPayload | null;
 
   if (!payload || !payload.id || !payload.email || !isRole(payload.role)) {
-    return { ok: false, res: NextResponse.json({ error: "No autorizado" }, { status: 401 }) };
+    return {
+      ok: false,
+      res: NextResponse.json({ error: "No autorizado" }, { status: 401 }),
+    };
   }
 
   return { ok: true, payload };
@@ -160,9 +166,11 @@ export async function GET() {
       loser.perdidos += 1;
     }
 
+    // Orden: puntos desc, ganados desc, jugados asc, nombre asc
     const rows = Array.from(table.values()).sort((a, b) => {
       if (b.puntos !== a.puntos) return b.puntos - a.puntos;
       if (b.ganados !== a.ganados) return b.ganados - a.ganados;
+      if (a.jugados !== b.jugados) return a.jugados - b.jugados; // menos PJ arriba
       return a.nombreOrden.localeCompare(b.nombreOrden);
     });
 

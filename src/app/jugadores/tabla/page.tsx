@@ -98,7 +98,6 @@ export default function TablaPosicionesJugadorPage() {
         const json = (await res.json()) as CategoryCfg;
         setCfg(json);
       } catch (err: unknown) {
-        // Si se aborta por navegación/cambio, no hacemos nada
         if (err instanceof DOMException && err.name === "AbortError") return;
 
         console.error("Error cargando config de categoría:", err);
@@ -127,15 +126,12 @@ export default function TablaPosicionesJugadorPage() {
   }, [cfg?.ascensos, cfg?.descensos, data?.rows.length]);
 
   function rowClass(pos: number) {
-    // Si todavía no hay config, o no hay filas, no pintamos.
     if (!data || !cfg || estilos.total === 0) return "bg-white hover:bg-gray-50";
 
-    // Ascenso
     if (estilos.ascensos > 0 && pos <= estilos.ascensoHasta) {
       return "bg-green-50 hover:bg-green-100";
     }
 
-    // Descenso
     if (estilos.descensos > 0 && pos >= estilos.descensoDesde) {
       return "bg-red-50 hover:bg-red-100";
     }
@@ -182,9 +178,7 @@ export default function TablaPosicionesJugadorPage() {
               </span>
             ) : null}
 
-            {loadingCfg ? (
-              <span className="text-gray-500">Cargando reglas…</span>
-            ) : null}
+            {loadingCfg ? <span className="text-gray-500">Cargando reglas…</span> : null}
           </div>
 
           <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
@@ -199,16 +193,16 @@ export default function TablaPosicionesJugadorPage() {
                       Jugador
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">
-                      Pts
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">
                       PJ
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">
+                    <th className="hidden sm:table-cell px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">
                       PG
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">
+                    <th className="hidden sm:table-cell px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">
                       PP
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">
+                      Pts
                     </th>
                   </tr>
                 </thead>
@@ -226,16 +220,16 @@ export default function TablaPosicionesJugadorPage() {
                         {r.nombreOrden || "—"}
                       </td>
                       <td className="px-4 py-3 text-sm text-gray-700">
-                        {r.puntos}
-                      </td>
-                      <td className="px-4 py-3 text-sm text-gray-700">
                         {r.jugados}
                       </td>
-                      <td className="px-4 py-3 text-sm text-gray-700">
+                      <td className="hidden sm:table-cell px-4 py-3 text-sm text-gray-700">
                         {r.ganados}
                       </td>
-                      <td className="px-4 py-3 text-sm text-gray-700">
+                      <td className="hidden sm:table-cell px-4 py-3 text-sm text-gray-700">
                         {r.perdidos}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-gray-700">
+                        {r.puntos}
                       </td>
                     </tr>
                   ))}

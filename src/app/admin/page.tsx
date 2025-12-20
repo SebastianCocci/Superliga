@@ -9,7 +9,7 @@ export default function AdminHomePage() {
   const router = useRouter();
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8 space-y-12">
+    <div className="max-w-6xl mx-auto py-4 sm:py-8 space-y-6 sm:space-y-12">
       <HeroSection />
 
       <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

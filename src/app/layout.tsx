@@ -1,11 +1,9 @@
-import type React from "react"
-import type { Metadata } from "next"
-import { Geist, Geist_Mono } from "next/font/google"
-import { Analytics } from "@vercel/analytics/next"
-import "./globals.css"
-
-const _geist = Geist({ subsets: ["latin"] })
-const _geistMono = Geist_Mono({ subsets: ["latin"] })
+import { ModalProvider } from "@/app/context/ModalContext";
+import GlobalModal from "@/components/GlobalModal";
+import { Analytics } from "@vercel/analytics/next";
+import type { Metadata } from "next";
+import type { ReactNode } from "react";
+import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Superliga Plaza - Gestiona tu Liga de Tenis",
@@ -28,19 +26,18 @@ export const metadata: Metadata = {
     ],
     apple: "/apple-icon.png",
   },
-}
+};
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode
-}>) {
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="es">
-      <body className={`font-sans antialiased`}>
-        {children}
-        <Analytics />
+      <body className="font-sans antialiased">
+        <ModalProvider>
+          {children}
+          <GlobalModal />
+          <Analytics />
+        </ModalProvider>
       </body>
     </html>
-  )
+  );
 }

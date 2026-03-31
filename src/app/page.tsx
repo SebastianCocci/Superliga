@@ -1,9 +1,9 @@
-import { Sidebar } from "./components/sidebar"
-import { Header } from "./components/header"
-import { Footer } from "./components/footer"
-import { HeroSection } from "./components/hero-section"
-import { ActionCard } from "./components/action-card"
-import { LeagueInfoSection } from "./components/league-info-section"
+import { Sidebar } from "@/components/sidebar"
+import { Header } from "@/components/header"
+import { Footer } from "@/components/footer"
+import { HeroSection } from "@/components/hero-section"
+import { ActionCard } from "@/components/action-card"
+import { LeagueInfoSection } from "@/components/league-info-section"
 
 export default function Home() {
   return (

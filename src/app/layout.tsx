@@ -1,5 +1,5 @@
 import { ModalProvider } from "@/app/context/ModalContext";
-import GlobalModal from "@/app/components/GlobalModal";
+import GlobalModal from "@/components/GlobalModal";
 import { Analytics } from "@vercel/analytics/next";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";

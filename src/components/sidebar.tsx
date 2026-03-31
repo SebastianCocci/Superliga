@@ -47,8 +47,6 @@ function MenuIcon({ isOpen }: { isOpen: boolean }) {
   );
 }
 
-/* ---------------------------------------------------------------- */
-
 type SidebarProps = {
   className?: string;
   role: "admin" | "jugador";
@@ -133,44 +131,22 @@ function SidebarItem({ icon, label, href }: SidebarItemProps) {
 /* ------------------ MENÚS ------------------ */
 
 const jugadorMenu = [
-  {
-    label: "Inicio",
-    href: "/jugadores",
-    icon: <HomeIcon />,
-  },
-  {
-    label: "Resultados",
-    href: "/jugadores/resultados", // solo aprobados
-    icon: <TrophyIcon />,
-  },
-  {
-    label: "Tabla",
-    href: "/jugadores/tabla", // tabla de posiciones
-    icon: <TableIcon />,
-  },
-  {
-    label: "Jugadores",
-    href: "/jugadores/lista", // lista de jugadores misma categoría
-    icon: <UsersIcon />,
-  },
+  { label: "Inicio", href: "/jugadores", icon: <HomeIcon /> },
+  { label: "Resultados", href: "/jugadores/resultados", icon: <TrophyIcon /> },
+  { label: "Tabla", href: "/jugadores/tabla", icon: <TableIcon /> },
+  { label: "Jugadores", href: "/jugadores/lista", icon: <UsersIcon /> },
   {
     label: "Calendario",
-    href: "/jugadores/calendario", // partidos pendientes
+    href: "/jugadores/partidos?from=calendario",
     icon: <CalendarIcon />,
   },
-  {
-    label: "Estadísticas",
-    href: "/jugadores/estadisticas", // futuro / opcional
-    icon: <StatsIcon />,
-  },
 ];
-
 
 const adminMenu = [
   { label: "Inicio", href: "/admin", icon: <HomeIcon /> },
   { label: "Gestionar Jugadores", href: "/admin/jugadores", icon: <UsersIcon /> },
   { label: "Resultados Pendientes", href: "/admin/resultados/pendientes", icon: <TrophyIcon /> },
-  { label: "Resultados Anteriores", href: "/admin/resultados/historial", icon: <HistoryIcon /> },
+  { label: "Resultados Anteriores", href: "/admin/resultados/aprobados", icon: <HistoryIcon /> },
   { label: "Tabla de Posiciones", href: "/admin/tabla", icon: <TableIcon /> },
   { label: "Generar Fixture", href: "/admin/fixture", icon: <CalendarIcon /> },
   { label: "Configuración", href: "/admin/configuracion", icon: <StatsIcon /> },

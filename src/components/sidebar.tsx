@@ -140,7 +140,6 @@ const jugadorMenu = [
     href: "/jugadores/partidos?from=calendario",
     icon: <CalendarIcon />,
   },
-  { label: "Estadísticas", href: "/jugadores/estadisticas", icon: <StatsIcon /> },
 ];
 
 const adminMenu = [
